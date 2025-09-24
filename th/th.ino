@@ -1,5 +1,4 @@
 // LED outputs
-// LED outputs
 int LED1 = 13;  // bit0 (LSB)
 int LED2 = 12;  // bit1
 int LED3 = 8;   // bit2 (MSB)
@@ -16,8 +15,8 @@ enum State {INPUT_NUM1, INPUT_NUM2};
 State currentState = INPUT_NUM1;
 
 // Calculator variables
-int num1 = 0;
-int num2 = 0 ;
+int num1;
+int num2;
 char operation = ' ';
 int result = 0;
 
@@ -43,24 +42,16 @@ void setup() {
 void loop() {
   switch (currentState) {
     case INPUT_NUM1:
-    delay(stepDelay);
-      if (digitalRead(LSB) == HIGH|| digitalRead(MSB) == HIGH) {
-        num1 = 0;
+      if (digitalRead(LSB) == LOW || digitalRead(MSB) == LOW) {
         delay(stepDelay);
         if (digitalRead(LSB) == LOW && digitalRead(MSB) == LOW) {
-          num1 =3;
-        delay(stepDelay);
-
+          num1 = 3;
         } else if (digitalRead(MSB) == LOW) {
-          num1 =2;
-        delay(stepDelay);
-
+          num1 = 2;
         } else if (digitalRead(LSB) == LOW) {
-          num1 =1;
-        delay(stepDelay);
-
+          num1 = 1;
         }
-        delay(stepDelay);
+        
         Serial.print("Num1: ");
         Serial.println(num1);
       }
@@ -81,23 +72,15 @@ void loop() {
 
     case INPUT_NUM2:
       if (digitalRead(LSB) == LOW || digitalRead(MSB) == LOW) {
-         num2 = 0;
         delay(stepDelay);
         if (digitalRead(LSB) == LOW && digitalRead(MSB) == LOW) {
           num2 = 3;
-        delay(stepDelay);
-
         } else if (digitalRead(MSB) == LOW) {
           num2 = 2;
-        delay(stepDelay);
-
         } else if (digitalRead(LSB) == LOW) {
           num2 = 1;
-        delay(stepDelay);
-
         }
-        delay(stepDelay);
-
+        
         Serial.print("Num2: ");
         Serial.println(num2);
       }
@@ -113,7 +96,7 @@ void loop() {
         Serial.println(result);
 
         displayResult(result);
-
+  
         // reset
         num1 = 0;
         num2 = 0;
@@ -125,25 +108,37 @@ void loop() {
   }
 }
 
-// --- Display function for signed binary (-3 … +3) ---
-void displayResult(int value) {
-  // clamp value between -3 and +3
-  if (value > 3) value = 3;
-  if (value < -3) value = -3;
+// ===== New displayResult function (without bitRead) =====
+void displayResult(int result) {
+  // Clamp result to range -3…+3
+  if (result > 3) result = 3;
+  if (result < -3) result = -3;
 
-  // convert to 3-bit two's complement
-  int binary = (value & 0b111);  // keep only 3 bits
+  // Clear LEDs first
+  digitalWrite(LED1, LOW);
+  digitalWrite(LED2, LOW);
+  digitalWrite(LED3, LOW);
+  delay(200);
 
-  // debug: show binary in serial
+  // Convert result to 3-bit value
+  int binary = result & 0b111;
+
+  // Debug: print binary value
   Serial.print("Binary: ");
-  for (int i = 2; i >= 0; i--) {
-    Serial.print(bitRead(binary, i));
+  for (int i = 2; i >= 0; i--) {   // loop from MSB → LSB
+    Serial.print((binary >> i) & 1);
   }
   Serial.println();
 
-  // update LEDs
-  digitalWrite(LED1, bitRead(binary, 0)); // LSB
-  digitalWrite(LED2, bitRead(binary, 1));
-  digitalWrite(LED3, bitRead(binary, 2)); // MSB
-}
+  // Update LEDs
+  digitalWrite(LED1, (binary >> 0) & 1); // LSB
+  digitalWrite(LED2, (binary >> 1) & 1); // middle
+  digitalWrite(LED3, (binary >> 2) & 1); // MSB
 
+  // Overflow indicator (all LEDs ON if result too big/small)
+  if (result > 3 || result < -3) {
+    digitalWrite(LED1, HIGH);
+    digitalWrite(LED2, HIGH);
+    digitalWrite(LED3, HIGH);
+  }
+}
