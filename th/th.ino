@@ -20,7 +20,7 @@ int num2;
 char operation = ' ';
 int result = 0;
 
-const int debounceDelay = 50;  
+// const int debounceDelay = 50;  
 const int stepDelay = 500;      
 
 void setup() {
