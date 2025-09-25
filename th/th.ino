@@ -136,9 +136,9 @@ void displayResult(int result) {
   digitalWrite(LED3, (binary >> 2) & 1); // MSB
 
   // Overflow indicator (all LEDs ON if result too big/small)
-  if (result > 3 || result < -3) {
-    digitalWrite(LED1, HIGH);
-    digitalWrite(LED2, HIGH);
-    digitalWrite(LED3, HIGH);
-  }
+  // if (result > 3 || result < -3) {
+  //   digitalWrite(LED1, HIGH);
+  //   digitalWrite(LED2, HIGH);
+  //   digitalWrite(LED3, HIGH);
+  // }
 }
