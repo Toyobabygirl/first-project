@@ -111,8 +111,8 @@ void loop() {
 // ===== New displayResult function (without bitRead) =====
 void displayResult(int result) {
   // Clamp result to range -3…+3
-  if (result > 3) result = 3;
-  if (result < -3) result = -3;
+  if (result > 3) result = 7;
+  if (result < -3) result = -7;
 
   // Clear LEDs first
   digitalWrite(LED1, LOW);
